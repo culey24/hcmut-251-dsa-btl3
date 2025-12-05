@@ -14,6 +14,7 @@ Edge<T>::Edge(VertexNode<T>* from, VertexNode<T>* to, float weight) {
 template <class T>
 string Edge<T>::toString() {
     // TODO: Return the string representation of the edge
+    // return dih
     return "";
 }
 
