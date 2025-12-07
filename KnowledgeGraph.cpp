@@ -1,6 +1,6 @@
 #include "KnowledgeGraph.h"
 #include "main.h"
-
+#include <vector>
 // =============================================================================
 // Class Edge Implementation
 // =============================================================================
@@ -16,6 +16,7 @@ template <class T>
 string Edge<T>::toString() {
     // TODO: Return the string representation of the edge
     // return
+    // FIXME
     return "";
 }
 
@@ -59,6 +60,14 @@ void VertexNode<T>::connect(VertexNode<T>* to, float weight) {
 }
 
 template <class T>
+Edge<T>* VertexNode<T>::getEdge(VertexNode<T>* to) {
+    for (Edge<T>* edging : adList) {
+        if (edging->to == to) return edging;
+    }
+    return nullptr;
+}
+
+template <class T>
 bool VertexNode<T>::equals(VertexNode<T>* node) {
     return vertexEQ(this->vertex, node->vertex);
 }
@@ -89,6 +98,7 @@ int VertexNode<T>::outDegree() {
 
 template <class T>
 string VertexNode<T>::toString() {
+    // FIXME
     return "";
 }
 
@@ -110,6 +120,7 @@ DGraphModel<T>::~DGraphModel() {
 
 template <class T>
 VertexNode<T>* DGraphModel<T>::getVertexNode(T& vertex) {
+    if (nodeList.empty()) return nullptr;
     for (VertexNode<T>* node : nodeList) {
         if (node->vertex == vertex) return node;
     }
@@ -149,6 +160,7 @@ float DGraphModel<T>::weight(T from, T to) {
 }
 template <class T>
 vector<T> DGraphModel<T>::getOutwardEdges(T from) {
+    // FIXME
     VertexNode<T>* fromNode = getVertexNode(from);
     if (fromNode == nullptr) throw VertexNotFoundException();
     vector<T> vertexList;
@@ -161,7 +173,89 @@ vector<T> DGraphModel<T>::getOutwardEdges(T from) {
 template <class T>
 void DGraphModel<T>::connect(T from, T to, float weight) {
     // TODO: Connect two vertices 'from' and 'to'
+    VertexNode<T>* fromNode = getVertexNode(from);
+    if (fromNode == nullptr) throw VertexNotFoundException();
+    VertexNode<T>* toNode = getVertexNode(to);
+    if (toNode == nullptr) throw VertexNotFoundException();
 
+    fromNode->connect(toNode, weight);
+}
+
+template <class T>
+void DGraphModel<T>::disconnect(T from, T to) {
+    VertexNode<T>* fromNode = getVertexNode(from);
+    if (fromNode == nullptr) throw VertexNotFoundException();
+    VertexNode<T>* toNode = getVertexNode(to);
+    if (toNode == nullptr) throw VertexNotFoundException();
+
+    fromNode->removeTo(toNode);
+}
+
+template <class T>
+bool DGraphModel<T>::connected(T from, T to) {
+    VertexNode<T>* fromNode = getVertexNode(from);
+    if (fromNode == nullptr) throw VertexNotFoundException();
+    VertexNode<T>* toNode = getVertexNode(to);
+    if (toNode == nullptr) throw VertexNotFoundException();
+
+    Edge<T>* edging = fromNode->getEdge(toNode);
+    return (edging != nullptr);
+}
+
+template <class T>
+int DGraphModel<T>::size() {
+    return this->nodeList.size();
+}
+
+template <class T>
+bool DGraphModel<T>::empty() {
+    return (this->nodeList.size() == 0);
+}
+
+template <class T>
+void DGraphModel<T>::clear() {
+    // FIXME
+    nodeList.clear();
+}
+
+template <class T>
+int DGraphModel<T>::inDegree(T vertex) {
+    VertexNode<T>* node = getVertexNode(vertex);
+    if (node == nullptr) throw VertexNotFoundException();
+    return node->inDegree_;
+}
+
+template <class T>
+int DGraphModel<T>::outDegree(T vertex) {
+    VertexNode<T>* node = getVertexNode(vertex);
+    if (node == nullptr) throw VertexNotFoundException();
+    return node->outDegree_;
+}
+
+template <class T>
+vector<T> DGraphModel<T>::vertices() {
+    vector<T> vertexList;
+    for (VertexNode<T>* node : nodeList) {
+        vertexList.push_back(node->vertex);
+    }
+    return vertexList;
+}
+
+template <class T>
+string DGraphModel<T>::toString() {
+    // FIXME
+    return "";
+}
+
+template <class T>
+string DGraphModel<T>::BFS(T start) {
+    // FIXME
+    return "";
+}
+
+template <class T>
+string DGraphModel<T>::DFS(T start) {
+    return "";
 }
 
 // TODO: Implement other methods of DGraphModel:
