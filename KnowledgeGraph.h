@@ -140,4 +140,17 @@ public:
     string findCommonAncestors(string entity1, string entity2);
 };
 
+template <class T>
+class Queue {
+    private:
+        vector<T> data;
+    public:
+        void pop();
+        void push(T element);
+        T front();
+        T back();
+        bool empty();
+        int size();
+};
+
 #endif // KNOWLEDGEGRAPH_H

@@ -1,6 +1,5 @@
 #include "KnowledgeGraph.h"
 #include "main.h"
-#include <vector>
 // =============================================================================
 // Class Edge Implementation
 // =============================================================================
@@ -250,6 +249,11 @@ string DGraphModel<T>::toString() {
 template <class T>
 string DGraphModel<T>::BFS(T start) {
     // FIXME
+    vector<VertexNode<T>*> visited;
+    Queue<VertexNode<T>*> queue; 
+
+    
+    
     return "";
 }
 
@@ -266,10 +270,12 @@ string DGraphModel<T>::DFS(T start) {
 
 KnowledgeGraph::KnowledgeGraph() {
     // TODO: Initialize the KnowledgeGraph
+    // aura farming
 }
 
 void KnowledgeGraph::addEntity(string entity) {
     // TODO: Add a new entity to the Knowledge Graph
+    for (string entitit : entities) if (entitit == entity) throw EntityExistsException();
 }
 
 void KnowledgeGraph::addRelation(string from, string to, float weight) {
@@ -280,6 +286,39 @@ void KnowledgeGraph::addRelation(string from, string to, float weight) {
 
 
 
+// =============================================================================
+// QUEUE // MY IMPLEMENTATION
+// =============================================================================
+
+template <class T>
+void Queue<T>::pop() {
+    if (!data.empty()) data.erase(data.begin());
+}
+
+template <class T>
+void Queue<T>::push(T element) {
+    data.push_back(element);
+}
+
+template <class T>
+T Queue<T>::front() {
+    return data.front();
+}
+
+template <class T>
+T Queue<T>::back() {
+    return data.back();
+}
+
+template <class T>
+bool Queue<T>::empty() {
+    return (data.size() == 0);
+}
+
+template <class T>
+int Queue<T>::size() {
+    return data.size();
+}
 // =============================================================================
 // Explicit Template Instantiation
 // =============================================================================
