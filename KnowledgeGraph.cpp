@@ -87,6 +87,7 @@ void VertexNode<T>::removeTo(VertexNode<T>* to) {
             delete edging;
             this->outDegree_--;
             to->inDegree_--;
+            break;
         }
     }
     return;
@@ -185,15 +186,15 @@ float DGraphModel<T>::weight(T from, T to) {
     return edging->weight;
 }
 template <class T>
-vector<T> DGraphModel<T>::getOutwardEdges(T from) {
+vector<Edge<T>*> DGraphModel<T>::getOutwardEdges(T from) {
     // FIXME
     VertexNode<T>* fromNode = getVertexNode(from);
     if (fromNode == nullptr) throw VertexNotFoundException();
-    vector<T> vertexList;
+    vector<Edge<T>*> outwardEdges;
     for (Edge<T>* edging : fromNode->adList) {
-        vertexList.push_back(edging->to->vertex);
+        if (edging->from->vertex == from) outwardEdges.push_back(edging);
     }     
-    return vertexList;
+    return outwardEdges;
 }
 
 template <class T>

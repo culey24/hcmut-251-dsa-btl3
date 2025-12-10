@@ -94,7 +94,7 @@ public:
     void add(T vertex);
     bool contains(T vertex);
     float weight(T from, T to);
-    vector<T> getOutwardEdges(T from);
+    vector<Edge<T>*> getOutwardEdges(T from);
     
     void connect(T from, T to, float weight = 0);
     void disconnect(T from, T to);
@@ -157,6 +157,17 @@ class Queue {
         T back();
         bool empty();
         int size();
+};
+
+template <class T>
+class Set {
+    private:
+        vector<vector<T*>> buckets;
+        int size;
+    public:
+        Set(int initSize);
+        ~Set();
+        int hash(T* );
 };
 
 #endif // KNOWLEDGEGRAPH_H
