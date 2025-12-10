@@ -173,4 +173,18 @@ class Stack {
         int size();
 };
 
+template <class T>
+class Set {
+    private:
+        vector<vector<T>> buckets;
+        int capacity;
+        string (*item2Str)(T&);
+        bool (*itemEQ)(T&, T&);
+        unsigned long hashFunction(string str);
+    public:
+        Set(int capacity, string (*item2Str)(T&),bool (*itemEQ)(T&, T&));
+        void insert(T item);
+        bool contains(T item);        
+};
+
 #endif // KNOWLEDGEGRAPH_H

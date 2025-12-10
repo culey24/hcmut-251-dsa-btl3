@@ -297,13 +297,38 @@ string DGraphModel<T>::toString() {
 
 template <class T>
 string DGraphModel<T>::BFS(T start) {
-    // FIXME
-    vector<VertexNode<T>*> visited;
-    
+    VertexNode<T>* startingNode = this->getVertexNode(start);
+    if (startingNode == nullptr) throw VertexNotFoundException();
+    Set<T> visited(1009, this->vertex2str, this->vertexEQ);
+    Queue<VertexNode<T>*> queue;   
+    stringstream ss;
 
-    
-    
-    return "";
+    ss << "[";
+    bool first = true;
+
+    queue.push(startingNode);
+    visited.insert(startingNode->vertex);
+
+    while (!queue.empty()) {
+        VertexNode<T>* node = queue.front();
+        queue.pop();
+        if (!first) ss << ", ";
+        ss << node->toString();
+        first = false;
+        for (Edge<T>* edging : node->adList) {
+            if (edging->from == node) {
+                VertexNode<T>* toNode = edging->to;
+                if (!visited.contains(toNode->vertex)) {
+                    visited.insert(toNode->vertex);
+                    queue.push(toNode);
+                }
+            }
+        }
+    }
+
+    ss << "]";
+
+    return ss.str();
 }
 
 template <class T>
@@ -465,6 +490,46 @@ template <class T>
 int Stack<T>::size() {
     return data.size();
 }
+
+// =============================================================================
+// SET // MY IMPLEMENTATION
+// =============================================================================
+
+template <class T>
+unsigned long Set<T>::hashFunction(string str) {
+    unsigned long hash = 5381;
+    for (char ch : str) {
+        hash = ((hash << 5) + hash) + ch; // hash * 33 + c 
+    }
+    return hash % capacity;
+}
+
+template <class T>
+Set<T>::Set(int capacity, string (*item2Str)(T&),bool (*itemEQ)(T&, T&)) :  capacity(capacity), 
+                                                                            item2Str(item2Str), 
+                                                                            itemEQ(itemEQ)
+{
+    this->buckets.resize(capacity);
+}
+
+template <class T>
+void Set<T>::insert(T item) {
+    if (this->contains(item)) return;
+    string str = item2Str(item);
+    int index = hashFunction(str);
+    buckets[index].push_back(item);
+}
+
+template <class T>
+bool Set<T>::contains(T item) {
+    string str = item2Str(item);
+    int index = hashFunction(str);
+    for (T& exists : buckets[index]) {
+        if (itemEQ(exists, item)) return true;
+    }
+    return false;
+}
+
 // =============================================================================
 // Explicit Template Instantiation
 // =============================================================================
