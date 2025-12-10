@@ -299,7 +299,7 @@ template <class T>
 string DGraphModel<T>::BFS(T start) {
     // FIXME
     vector<VertexNode<T>*> visited;
-    Queue<VertexNode<T>*> queue; 
+    
 
     
     
@@ -433,11 +433,38 @@ int Queue<T>::size() {
 }
 
 // =============================================================================
-// SET // MY IMPLEMENTATION
+// STACK // MY IMPLEMENTATION
 // =============================================================================
 
+template <class T>
+Stack<T>::Stack() {
+    // aura farming
+}
 
+template <class T>
+Stack<T>::~Stack() {
+    // aura farming
+}
 
+template <class T>
+void Stack<T>::pop() {
+    data.pop_back();
+}
+
+template <class T>
+T Stack<T>::top() {
+    return data.back();
+}
+
+template <class T> 
+bool Stack<T>::empty() {
+    return (data.size() == 0);
+}
+
+template <class T>
+int Stack<T>::size() {
+    return data.size();
+}
 // =============================================================================
 // Explicit Template Instantiation
 // =============================================================================

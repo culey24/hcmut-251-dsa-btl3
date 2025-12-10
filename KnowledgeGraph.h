@@ -160,14 +160,17 @@ class Queue {
 };
 
 template <class T>
-class Set {
+class Stack {
     private:
-        vector<vector<T*>> buckets;
-        int size;
+        vector<T> data;
     public:
-        Set(int initSize);
-        ~Set();
-        int hash(T* );
+        Stack();
+        ~Stack();
+        void pop();
+        void push(T element);
+        T top();
+        bool empty();
+        int size();
 };
 
 #endif // KNOWLEDGEGRAPH_H
