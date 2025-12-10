@@ -187,12 +187,11 @@ float DGraphModel<T>::weight(T from, T to) {
 }
 template <class T>
 vector<Edge<T>*> DGraphModel<T>::getOutwardEdges(T from) {
-    // FIXME
     VertexNode<T>* fromNode = getVertexNode(from);
     if (fromNode == nullptr) throw VertexNotFoundException();
     vector<Edge<T>*> outwardEdges;
     for (Edge<T>* edging : fromNode->adList) {
-        if (edging->from->vertex == from) outwardEdges.push_back(edging);
+        if (edging->from == fromNode) outwardEdges.push_back(edging);
     }     
     return outwardEdges;
 }
@@ -241,7 +240,21 @@ bool DGraphModel<T>::empty() {
 
 template <class T>
 void DGraphModel<T>::clear() {
-    // FIXME
+    for (VertexNode<T>* node : nodeList) {
+        for (int i = 0; i < node->adList.size(); i++) {
+            Edge<T>* edging = node->adList[i];
+            if (edging == nullptr) continue;
+
+            if (edging->from == node) {
+                // NOTE: IF THERE EXISTS A LOOP ADD LOGIC HERE FIXME
+                delete edging;
+                node->adList[i] = nullptr;
+            }
+        }
+    }
+
+    for (VertexNode<T>* node : nodeList) delete node;
+
     nodeList.clear();
 }
 
@@ -270,8 +283,16 @@ vector<T> DGraphModel<T>::vertices() {
 
 template <class T>
 string DGraphModel<T>::toString() {
-    // FIXME
-    return "";
+    stringstream ss;
+    ss << "[";
+    
+    for (int i = 0; i < nodeList.size(); i++) {
+        ss << nodeList[i]->toString();
+        if (i != nodeList.size() - 1) ss << ", ";
+    }
+
+    ss << "]";
+    return ss.str();
 }
 
 template <class T>
