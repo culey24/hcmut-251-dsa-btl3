@@ -61,6 +61,9 @@ public:
     int outDegree();
     string toString();
 
+    // MANUALLY ADDED FUNCTIONS
+    vector<T> getAdjacentVertices();
+
     friend class Edge<T>;
     friend class DGraphModel<T>;
 };
@@ -121,6 +124,7 @@ private:
     DGraphModel<string> graph;
     vector<string> entities;
 
+    int getEntityIndex(string entity);
 public:
     KnowledgeGraph();
     
@@ -145,6 +149,8 @@ class Queue {
     private:
         vector<T> data;
     public:
+        Queue();
+        ~Queue();
         void pop();
         void push(T element);
         T front();

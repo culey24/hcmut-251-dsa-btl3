@@ -13,10 +13,11 @@ Edge<T>::Edge(VertexNode<T>* from, VertexNode<T>* to, float weight) {
 
 template <class T>
 string Edge<T>::toString() {
-    // TODO: Return the string representation of the edge
-    // return
-    // FIXME
-    return "";
+    stringstream ss;
+    ss << "(" << this->from->vertex2str(this->from->vertex)
+    << ", " << this->to->vertex2str(this->to->vertex)
+    << ", " << this->weight <<")";
+    return ss.str();
 }
 
 // TODO: Implement other methods of Edge:
@@ -77,6 +78,12 @@ void VertexNode<T>::removeTo(VertexNode<T>* to) {
         Edge<T>* edging = adList[i];
         if (edging->to->equals(to)) {
             adList.erase(adList.begin() + i);
+            
+            for (int j = 0; j < to->adList.size(); j++) {
+                if (to->adList[j] == edging) to->adList.erase(to->adList.begin() + j);
+                break;
+            }
+
             delete edging;
             this->outDegree_--;
             to->inDegree_--;
@@ -97,8 +104,28 @@ int VertexNode<T>::outDegree() {
 
 template <class T>
 string VertexNode<T>::toString() {
-    // FIXME
-    return "";
+    stringstream ss;
+    ss << "(" << this->vertex2str(this->vertex)
+    << ", " << this->inDegree_
+    << ", " << this->outDegree_
+    << ", " << "[";
+
+    for (int i = 0; i < adList.size(); i++) {
+        ss << adList[i]->toString();
+        if (i != adList.size() - 1) ss << ", ";
+    }
+
+    ss << "]";
+    return ss.str();
+}
+
+template <class T>
+vector<T> VertexNode<T>::getAdjacentVertices() {
+    vector<T> adjacentVertices;
+    for (Edge<T>* edging : adList) {
+        adjacentVertices.push_back(edging->to->vertex);
+    }
+    return adjacentVertices;
 }
 
 // =============================================================================
@@ -268,6 +295,13 @@ string DGraphModel<T>::DFS(T start) {
 // Class KnowledgeGraph Implementation
 // =============================================================================
 
+int KnowledgeGraph::getEntityIndex(string entity) {
+    for (int i = 0; i < entities.size(); i++) {
+        if (entities[i] == entity) return i;
+    }
+    return -1;
+}
+
 KnowledgeGraph::KnowledgeGraph() {
     // TODO: Initialize the KnowledgeGraph
     // aura farming
@@ -276,19 +310,75 @@ KnowledgeGraph::KnowledgeGraph() {
 void KnowledgeGraph::addEntity(string entity) {
     // TODO: Add a new entity to the Knowledge Graph
     for (string entitit : entities) if (entitit == entity) throw EntityExistsException();
+    
+    graph.add(entity);
+
+    entities.push_back(entity);
 }
 
 void KnowledgeGraph::addRelation(string from, string to, float weight) {
     // TODO: Add a directed relation
+    VertexNode<string>* fromNode = graph.getVertexNode(from);
+    VertexNode<string>* toNode = graph.getVertexNode(to);    
+    if (fromNode == nullptr || toNode == nullptr) throw EntityNotFoundException();
+
+    fromNode->connect(toNode, weight);
 }
 
+vector<string> KnowledgeGraph::getAllEntities() {
+    return entities;
+}
+
+vector<string> KnowledgeGraph::getNeighbors(string entity) {
+    VertexNode<string>* node = graph.getVertexNode(entity);
+    if (node == nullptr) throw EntityNotFoundException();
+
+    return node->getAdjacentVertices();
+}
+
+string KnowledgeGraph::bfs(string start) {
+    // FIXME
+    return "";
+}
+
+string KnowledgeGraph::dfs(string start) {
+    //FIXME
+    return "";
+}
+
+bool KnowledgeGraph::isReachable(string from, string to) {
+    // implemented using bfs
+    vector<bool> visited(entities.size(), false);
+    vector<string> result;
+    Queue<string> queue;
+
+    queue.push(from);
+    visited[this->getEntityIndex(from)] = true;    
+    
+    while (!queue.empty()) {
+
+    }
+}
+
+string KnowledgeGraph::toString() {
+    // FIXME
+    return "";
+}
 // TODO: Implement other methods of KnowledgeGraph:
-
-
 
 // =============================================================================
 // QUEUE // MY IMPLEMENTATION
 // =============================================================================
+
+template <class T>
+Queue<T>::Queue() {
+    // aura farming
+}
+
+template <class T>
+Queue<T>::~Queue() {
+    // also aura farming
+}
 
 template <class T>
 void Queue<T>::pop() {
@@ -319,6 +409,13 @@ template <class T>
 int Queue<T>::size() {
     return data.size();
 }
+
+// =============================================================================
+// SET // MY IMPLEMENTATION
+// =============================================================================
+
+
+
 // =============================================================================
 // Explicit Template Instantiation
 // =============================================================================
