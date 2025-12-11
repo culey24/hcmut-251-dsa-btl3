@@ -312,9 +312,11 @@ string DGraphModel<T>::BFS(T start) {
     while (!queue.empty()) {
         VertexNode<T>* node = queue.front();
         queue.pop();
+        
         if (!first) ss << ", ";
         ss << node->toString();
         first = false;
+
         for (Edge<T>* edging : node->adList) {
             if (edging->from == node) {
                 VertexNode<T>* toNode = edging->to;
@@ -333,7 +335,41 @@ string DGraphModel<T>::BFS(T start) {
 
 template <class T>
 string DGraphModel<T>::DFS(T start) {
-    return "";
+    VertexNode<T>* startingNode = this->getVertexNode(start);
+    if (startingNode == nullptr) throw VertexNotFoundException();
+
+    Set<T> visited(1009, this->vertex2str, this->vertexEQ);
+    Stack<VertexNode<T>*> stack;
+    stringstream ss;
+    bool first = true;
+
+    ss << "[";
+
+    stack.push(startingNode);
+
+    while (!stack.empty()) {
+        VertexNode<T>* node = stack.top();
+        stack.pop();
+
+        if (visited.contains(node->vertex)) continue;
+        visited.insert(node->vertex);
+
+        if (!first) ss << ", ";
+        ss << node->toString();
+        first = false;
+
+        for (int i = node->adList.size() - 1; i >= 0; i--) {
+            Edge<T>* edging = node->adList[i];
+            if (edging->from == node) {
+                VertexNode<T>* toNode = edging->to;
+                if (!visited.contains(toNode->vertex)) stack.push(toNode);
+            }
+        }
+    }
+
+    ss << "]";
+
+    return ss.str();
 }
 
 // TODO: Implement other methods of DGraphModel:
