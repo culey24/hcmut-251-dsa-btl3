@@ -16,7 +16,7 @@ string Edge<T>::toString() {
     stringstream ss;
     ss << "(" << this->from->vertex2str(this->from->vertex)
     << ", " << this->to->vertex2str(this->to->vertex)
-    << ", " << this->weight <<")";
+    << ", " << to_string(this->weight) <<")";
     return ss.str();
 }
 
