@@ -121,12 +121,21 @@ string VertexNode<T>::toString() {
 }
 
 template <class T>
-vector<T> VertexNode<T>::getAdjacentVertices() {
-    vector<T> adjacentVertices;
+vector<T> VertexNode<T>::getOutVertices() {
+    vector<T> outVertices;
     for (Edge<T>* edging : adList) {
-        adjacentVertices.push_back(edging->to->vertex);
+        if (edging->from == this) outVertices.push_back(edging->to->vertex);
     }
-    return adjacentVertices;
+    return outVertices;
+}
+
+template <class T>
+vector<T> VertexNode<T>::getInVertices() {
+    vector<T> inVertices;
+    for (Edge<T>* edging : adList) {
+        if (edging->to == this) inVertices.push_back(edging->from->vertex);
+    }
+    return inVertices;
 }
 
 // =============================================================================
@@ -241,16 +250,10 @@ bool DGraphModel<T>::empty() {
 template <class T>
 void DGraphModel<T>::clear() {
     for (VertexNode<T>* node : nodeList) {
-        for (int i = 0; i < node->adList.size(); i++) {
-            Edge<T>* edging = node->adList[i];
-            if (edging == nullptr) continue;
-
-            if (edging->from == node) {
-                // NOTE: IF THERE EXISTS A LOOP ADD LOGIC HERE FIXME
-                delete edging;
-                node->adList[i] = nullptr;
-            }
+        for (Edge<T>* edging : node->adList) {
+            if (edging->from == node) delete edging;
         }
+        node->adList.clear();
     }
 
     for (VertexNode<T>* node : nodeList) delete node;
@@ -372,6 +375,7 @@ string DGraphModel<T>::DFS(T start) {
     return ss.str();
 }
 
+
 // TODO: Implement other methods of DGraphModel:
 
 // =============================================================================
@@ -388,6 +392,8 @@ int KnowledgeGraph::getEntityIndex(string entity) {
 KnowledgeGraph::KnowledgeGraph() {
     // TODO: Initialize the KnowledgeGraph
     // aura farming
+    graph = DGraphModel<string>([](string& a, string& b){ return a == b; }, 
+                                [](string& s){ return s; });
 }
 
 void KnowledgeGraph::addEntity(string entity) {
@@ -416,38 +422,182 @@ vector<string> KnowledgeGraph::getNeighbors(string entity) {
     VertexNode<string>* node = graph.getVertexNode(entity);
     if (node == nullptr) throw EntityNotFoundException();
 
-    return node->getAdjacentVertices();
+    return node->getOutVertices();
 }
 
 string KnowledgeGraph::bfs(string start) {
-    // FIXME
-    return "";
+    if (!graph.contains(start)) throw EntityNotFoundException();
+    return graph.BFS(start);
 }
 
 string KnowledgeGraph::dfs(string start) {
-    //FIXME
-    return "";
+    if (!graph.contains(start)) throw EntityNotFoundException();
+    return graph.DFS(start);
 }
 
 bool KnowledgeGraph::isReachable(string from, string to) {
     // implemented using bfs
-    vector<bool> visited(entities.size(), false);
-    vector<string> result;
-    Queue<string> queue;
+    if (!graph.contains(from) || !graph.contains(to)) throw EntityNotFoundException();
 
-    queue.push(from);
-    visited[this->getEntityIndex(from)] = true;    
-    
+    if (from == to) return true;
+
+    VertexNode<string>* startingNode = graph.getVertexNode(from);
+    Set<string> visited(1009, 
+                        [](string& s){ return s; }, 
+                        [](string& a, string& b){ return a == b; });
+    Queue<VertexNode<string>*> queue;
+
+    queue.push(startingNode);
+    visited.insert(startingNode->getVertex());
+
     while (!queue.empty()) {
+        VertexNode<string>* node = queue.front();
+        queue.pop();
 
+        vector<string> outVertices = node->getOutVertices();
+        for (string vertex : outVertices) {
+            if (vertex == to) return true;
+            if (!visited.contains(vertex)) {
+                visited.insert(vertex);
+                queue.push(graph.getVertexNode(vertex));
+            }
+        }
     }
+    return false;
 }
 
 string KnowledgeGraph::toString() {
-    // FIXME
-    return "";
+    return graph.toString();
 }
-// TODO: Implement other methods of KnowledgeGraph:
+
+vector<string> KnowledgeGraph::getRelatedEntities(string entity, int depth) {
+    VertexNode<string>* startingNode = graph.getVertexNode(entity);
+    if (startingNode == nullptr) throw EntityNotFoundException();
+    vector<string> related;
+    Set<string> visited(1009, 
+                        [](string& s){ return s; },
+                        [](string& a, string& b){ return a == b; });
+    Queue<VertexNode<string>*> queueNode;
+    Queue<int> queueDepth;
+
+    queueNode.push(startingNode);
+    queueDepth.push(0);
+    visited.insert(entity);
+
+    while (!queueNode.empty() && !queueDepth.empty()) {
+        VertexNode<string>* node = queueNode.front();
+        int nodeDepth = queueDepth.front();
+        queueNode.pop();
+        queueDepth.pop();
+
+        if (nodeDepth > 0) related.push_back(node->getVertex());
+        if (nodeDepth < depth) {
+            vector<string> outVertices = node->getOutVertices();
+            for (string& vertex : outVertices) {
+                VertexNode<string>* outNode = graph.getVertexNode(vertex);
+                if (!visited.contains(vertex)) {
+                    visited.insert(vertex);
+                    queueNode.push(outNode);
+                    queueDepth.push(nodeDepth + 1);
+                }
+            }
+        }
+    }
+    return related;
+}
+
+vector<string> KnowledgeGraph::getAncestors(string start) {
+    VertexNode<string>* startingNode = graph.getVertexNode(start);
+    if (startingNode == nullptr) return {};
+    
+    vector<string> ancestors;
+    Set<string> visited(1009, 
+                        [](string& s){ return s; },
+                        [](string& a, string& b){ return a == b; });
+    Stack<VertexNode<string>*> stack;
+    
+    stack.push(startingNode);
+    visited.insert(start);
+
+    while (!stack.empty()) {
+        VertexNode<string>* node = stack.top();
+        stack.pop();
+        ancestors.push_back(node->getVertex());
+        
+        vector<string> parents = node->getInVertices();
+        for (string parent : parents) {
+            VertexNode<string>* parentNode = graph.getVertexNode(parent);
+            if (!visited.contains(parent)) {
+                visited.insert(parent);
+                stack.push(parentNode);
+            }
+        }
+    }
+    return ancestors;
+}
+
+int KnowledgeGraph::bfsDistance(string start, string target) {
+    if (start == target) return 0;
+    
+    Set<string> visited(1009, 
+                        [](string& s){ return s; },
+                        [](string& a, string& b){ return a == b; });
+    Queue<VertexNode<string>*> queueNode;
+    Queue<int> queueDistance;
+
+    queueNode.push(graph.getVertexNode(start));
+    queueDistance.push(0);
+    visited.insert(start);
+    while (!queueNode.empty() && !queueDistance.empty()) {
+        VertexNode<string>* node = queueNode.front();
+        int distance = queueDistance.front();
+        queueNode.pop();
+        queueDistance.pop();
+
+        if (node->getVertex() == target) return distance;
+        vector<string> outVertices = node->getOutVertices();
+        for (string outVertex : outVertices) {
+            if (!visited.contains(outVertex)) {
+                visited.insert(outVertex);
+                queueNode.push(graph.getVertexNode(outVertex));
+                queueDistance.push(distance + 1);
+            }
+        }
+    }
+    return 999999;
+}
+
+string KnowledgeGraph::findCommonAncestors(string entity1, string entity2) {
+    VertexNode<string>* entityOne = graph.getVertexNode(entity1);
+    VertexNode<string>* entityTwo = graph.getVertexNode(entity2);
+
+    if (entityOne == nullptr || entityTwo == nullptr) throw EntityNotFoundException();
+
+    vector<string> ancestorsOfOne = this->getAncestors(entity1);
+    vector<string> ancestorsOfTwo = this->getAncestors(entity2);
+    
+    vector<string> common;
+    for (string ancestorOne : ancestorsOfOne) {
+        for (string ancestorTwo : ancestorsOfTwo) {
+            if (ancestorOne == ancestorTwo) {
+                common.push_back(ancestorOne);
+                break;
+            }
+        }
+    }
+    if (common.empty()) return "No common ancestor";
+    string bestAncestor;
+    int minTotalDistance = 999999;
+    for (string ancestor : common) {
+        int distanceOne = bfsDistance(ancestor, entity1);
+        int distanceTwo = bfsDistance(ancestor, entity2);
+        if (distanceOne + distanceTwo < minTotalDistance) {
+            minTotalDistance = distanceOne + distanceTwo;
+            bestAncestor = ancestor;
+        }
+    }
+    return bestAncestor;
+}
 
 // =============================================================================
 // QUEUE // MY IMPLEMENTATION

@@ -62,7 +62,8 @@ public:
     string toString();
 
     // MANUALLY ADDED FUNCTIONS
-    vector<T> getAdjacentVertices();
+    vector<T> getOutVertices();
+    vector<T> getInVertices();
 
     friend class Edge<T>;
     friend class DGraphModel<T>;
@@ -125,6 +126,10 @@ private:
     vector<string> entities;
 
     int getEntityIndex(string entity);
+
+    // MANUALLY ADDED FUNCTION
+    vector<string> getAncestors(string start);
+    int bfsDistance(string start, string target);
 public:
     KnowledgeGraph();
     
