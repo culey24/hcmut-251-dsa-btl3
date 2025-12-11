@@ -116,7 +116,7 @@ string VertexNode<T>::toString() {
         if (i != adList.size() - 1) ss << ", ";
     }
 
-    ss << "]";
+    ss << "])";
     return ss.str();
 }
 
@@ -253,8 +253,9 @@ void DGraphModel<T>::clear() {
         for (Edge<T>* edging : node->adList) {
             if (edging->from == node) delete edging;
         }
-        node->adList.clear();
     }
+
+    for (VertexNode<T>* node : nodeList) node->adList.clear();
 
     for (VertexNode<T>* node : nodeList) delete node;
 
@@ -667,6 +668,11 @@ T Stack<T>::top() {
     return data.back();
 }
 
+template <class T>
+void Stack<T>::push(T element) {
+    data.push_back(element);
+}
+
 template <class T> 
 bool Stack<T>::empty() {
     return (data.size() == 0);
@@ -734,3 +740,21 @@ template class DGraphModel<string>;
 template class DGraphModel<int>;
 template class DGraphModel<float>;
 template class DGraphModel<char>;
+
+template class Stack<VertexNode<string>*>; 
+template class Queue<VertexNode<string>*>; 
+template class Set<string>;
+
+template class Stack<VertexNode<int>*>;
+template class Queue<VertexNode<int>*>;
+template class Set<int>;
+
+template class Stack<VertexNode<float>*>;
+template class Queue<VertexNode<float>*>;
+template class Set<float>;
+
+template class Stack<VertexNode<char>*>;
+template class Queue<VertexNode<char>*>;
+template class Set<char>;
+
+template class Queue<int>;
