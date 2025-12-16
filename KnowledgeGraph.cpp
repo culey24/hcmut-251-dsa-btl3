@@ -80,8 +80,10 @@ void VertexNode<T>::removeTo(VertexNode<T>* to) {
             adList.erase(adList.begin() + i);
             
             for (int j = 0; j < to->adList.size(); j++) {
-                if (to->adList[j] == edging) to->adList.erase(to->adList.begin() + j);
-                break;
+                if (to->adList[j] == edging) {
+                    to->adList.erase(to->adList.begin() + j);
+                    break;
+                }
             }
 
             delete edging;
