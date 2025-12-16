@@ -14,9 +14,21 @@ Edge<T>::Edge(VertexNode<T>* from, VertexNode<T>* to, float weight) {
 template <class T>
 string Edge<T>::toString() {
     stringstream ss;
-    ss << "(" << this->from->vertex2str(this->from->vertex)
-    << ", " << this->to->vertex2str(this->to->vertex)
-    << ", " << to_string(this->weight) <<")";
+    if (this->from->vertex2str) {
+        ss << "(" << this->from->vertex2str(this->from->vertex);
+    }
+    else {
+        ss << "(" << this->from->vertex;
+    }
+
+    if (this->to->vertex2str) {
+        ss << ", " << this->to->vertex2str(this->to->vertex);
+    }
+    else {
+        ss << ", " << this->to->vertex;
+    }
+
+    ss << ", " << to_string(this->weight) <<")";
     return ss.str();
 }
 
@@ -69,7 +81,8 @@ Edge<T>* VertexNode<T>::getEdge(VertexNode<T>* to) {
 
 template <class T>
 bool VertexNode<T>::equals(VertexNode<T>* node) {
-    return vertexEQ(this->vertex, node->vertex);
+    if (this->vertexEQ) return vertexEQ(this->vertex, node->vertex);
+    else return (this->vertex == node->vertex);    
 }
 
 template <class T>
@@ -108,10 +121,20 @@ int VertexNode<T>::outDegree() {
 template <class T>
 string VertexNode<T>::toString() {
     stringstream ss;
-    ss << "(" << this->vertex2str(this->vertex)
-    << ", " << this->inDegree_
-    << ", " << this->outDegree_
-    << ", " << "[";
+    
+    if (vertex2str != nullptr) {
+        ss << "(" << this->vertex2str(this->vertex)
+        << ", " << this->inDegree_
+        << ", " << this->outDegree_
+        << ", " << "[";
+    }
+
+    else {
+        ss << "(" << this->vertex
+        << ", " << this->inDegree_
+        << ", " << this->outDegree_
+        << ", " << "[";
+    }
 
     for (int i = 0; i < adList.size(); i++) {
         ss << adList[i]->toString();
@@ -167,6 +190,8 @@ VertexNode<T>* DGraphModel<T>::getVertexNode(T& vertex) {
 
 template <class T>
 string DGraphModel<T>::vertex2Str(VertexNode<T>& node) {
+    // FIXME
+    if (this->vertex2str == nullptr) return node.toString();
     return vertex2str(node.vertex);
 }
 
@@ -320,7 +345,7 @@ string DGraphModel<T>::BFS(T start) {
         queue.pop();
         
         if (!first) ss << ", ";
-        ss << node->toString();
+        ss << this->vertex2Str(*node);
         first = false;
 
         for (Edge<T>* edging : node->adList) {
@@ -361,7 +386,9 @@ string DGraphModel<T>::DFS(T start) {
         visited.insert(node->vertex);
 
         if (!first) ss << ", ";
-        ss << node->toString();
+        if (this->vertex2str == nullptr) ss << node->toString();
+        else ss << this->vertex2str(node->vertex);
+
         first = false;
 
         for (int i = node->adList.size() - 1; i >= 0; i--) {
@@ -395,8 +422,10 @@ int KnowledgeGraph::getEntityIndex(string entity) {
 KnowledgeGraph::KnowledgeGraph() {
     // TODO: Initialize the KnowledgeGraph
     // aura farming
+    /*
     graph = DGraphModel<string>([](string& a, string& b){ return a == b; }, 
                                 [](string& s){ return s; });
+    */
 }
 
 void KnowledgeGraph::addEntity(string entity) {
@@ -709,17 +738,35 @@ Set<T>::Set(int capacity, string (*item2Str)(T&),bool (*itemEQ)(T&, T&)) :  capa
 template <class T>
 void Set<T>::insert(T item) {
     if (this->contains(item)) return;
-    string str = item2Str(item);
+    string str;
+    if (this->item2Str) str = item2Str(item);
+    else {
+        stringstream ss;
+        ss << item;
+        str = ss.str();
+    }
+
     int index = hashFunction(str);
     buckets[index].push_back(item);
 }
 
 template <class T>
 bool Set<T>::contains(T item) {
-    string str = item2Str(item);
+    string str;
+    if (this->item2Str) str = this->item2Str(item);
+    else {
+        stringstream ss;
+        ss << item;
+        str = ss.str();
+    }
     int index = hashFunction(str);
     for (T& exists : buckets[index]) {
-        if (itemEQ(exists, item)) return true;
+        if (this->itemEQ) {
+            if (itemEQ(exists, item)) return true;
+        }
+        else {
+            if (exists == item) return true;
+        }
     }
     return false;
 }
